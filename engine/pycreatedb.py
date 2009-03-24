@@ -51,6 +51,6 @@ def main():
     
     print "Optimizing database"
     db.optimize_database()
-    
+
 if __name__ == "__main__":
     main()

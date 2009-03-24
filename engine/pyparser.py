@@ -96,6 +96,8 @@ class PinYinParser:
             traceback.print_exc ()
             raise e
 
+
+
 class ShuangPinParser:
     def __init__ (self, schema = "MSPY"):
         self._gbk = True
@@ -145,9 +147,25 @@ class ShuangPinParser:
         pys += self.parse_shuangpin_recursive (pys, string, auto_correct, gbk)
         return pys
 
+
+class Cache:
+    def __init__(self):
+        pass    
+
+    @classmethod
+    def test (self,string):
+        parser = PinYinParser ()
+        pys = parser.parse (string)
+        #print dir(pys)
+        print "'".join (map (str, pys))
+
+
 if __name__ == "__main__":
-    # parser = PinYinParser ()
-    parser = ShuangPinParser ()
-    pys = parser.parse (sys.argv[1])
-    print "'".join (map (str, pys))
+    parser = PinYinParser ()
+    #parser = ShuangPinParser ()
+    #pys = parser.parse (sys.argv[1])
+    #pys = parser.parse ("eihfiehifh")    
+    #print "'".join (map (str, pys))
+
+    Cache.test("wojintianbutaishufu") 
 

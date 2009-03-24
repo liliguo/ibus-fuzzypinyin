@@ -254,6 +254,8 @@ class PYSQLiteDB:
 
 
         i = 0
+        s_i=0
+
         if mohu == False:
             for py in pys[:4]:
                 if py.is_valid_pinyin ():
@@ -262,6 +264,10 @@ class PYSQLiteDB:
                     sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
                 i += 1
         else:
+
+            pinyin_mohu_ids = []
+            shengmu_mohu_ids = []
+
             for py in pys[:4]:
                 if py.is_valid_pinyin ():
                     shengmu = py.get_shengmu ()
@@ -281,23 +287,71 @@ class PYSQLiteDB:
                         for y in yunmu_list:
                             pinyin = s + y
                             if pinyin in pydict.PINYIN_DICT:
+<<<<<<< HEAD:engine/pysqlitedb.py
                                 pinyin_ids.append (str (pydict.PINYIN_DICT[pinyin]))
                     if len (pinyin_ids) > 1:
                         sql_conditions.append ("y%d in (%s)" % (i, ",".join (pinyin_ids)))
                     else:
                         sql_conditions.append ("y%d == %s" % (i, pinyin_ids[0]))
+=======
+                                pinyin_ids.append (pydict.PINYIN_DICT[pinyin])
+                                #print pinyin_ids
+                    
+                    pinyin_mohu_ids.append(pinyin_ids)
+                     
+                    sql_pinyin = []
+                    dkr_pinyinid=[]
+           
+    
+                    dkr = lambda x, y: [xx + [yy] for xx in x for yy in y]
+                    dkr_pinyinid = reduce(dkr, pinyin_mohu_ids, [[]]) 
+    
+                    for ii in dkr_pinyinid:
+                        id = 0
+                        s = []
+                        for j in ii[:4]:
+                            s.append("y%d = %d" % (id, j))
+                            id = id + 1
+                        sql_pinyin.append("( %s )" % " AND ".join(s))
+                    sql_conditions.append("( %s )" % " OR ".join(sql_pinyin))
+                    #print sql_conditions
+>>>>>>> changed the speed of fuzzypinyin:engine/pysqlitedb.py
 
                 else:
-                    shengmu = py.get_shengmu ()
+                    shengmu_ids = []
+                    shengmu = py.get_shengmu ()                    
                     if shengmu in pydict.MOHU_SHENGMU:
-                        shengmu_ids = []
                         for s in pydict.MOHU_SHENGMU[shengmu]:
-                            shengmu_ids.append (str (pydict.SHENGMU_DICT[s]))
-                        sql_conditions.append ("s%d in (%s)" % (i, ",".join (shengmu_ids)))
+                            shengmu_ids.append (pydict.SHENGMU_DICT[s])
+                        #print shengmu_ids
+                        shengmu_mohu_ids.append(shengmu_ids)                      
+                        #print shengmu_mohu_ids
+                        ssql_pinyin = []
+                        sdkr_pinyinid=[]
+           
+    
+                        sdkr = lambda x, y: [xx + [yy] for xx in x for yy in y]
+                        sdkr_pinyinid = reduce(sdkr, shengmu_mohu_ids, [[]]) 
+    
+                        for si in sdkr_pinyinid:
+                            sid = 0
+                            ss = []
+                            for sj in si[:4]:
+                                ss.append("s%d = %d" % (sid, sj))
+                                sid = sid + 1
+                        #sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
+                            ssql_pinyin.append("( %s )" % " AND ".join(ss))
+                        sql_conditions.append("( %s )" % " OR ".join(ssql_pinyin))
+                        #print sql_conditions
                     else:
                         sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
+<<<<<<< HEAD:engine/pysqlitedb.py
                 i += 1
 
+=======
+                        #print i
+       
+>>>>>>> changed the speed of fuzzypinyin:engine/pysqlitedb.py
         if pys[4:]:
             pp = lambda (x): x.get_pattern (mohu)
             pattern = "'".join (map (pp, pys[4:]))
@@ -308,6 +362,8 @@ class PYSQLiteDB:
         sql_prefix = "SELECT * FROM " + tables_union
 
         sql_string = sql_prefix + " GROUP BY phrase ORDER BY user_freq DESC, freq DESC;"
+            
+        #print sql_string
 
         result = list (self.db.execute (sql_string).fetchall ())
 
@@ -516,7 +572,7 @@ def test_case (string):
     while len (result) != len (pys):
         pps = pys[len (result):]
         for x in range (len (pps), 0, -1):
-            candidates = db.select_words_by_pinyin_list (pps[:x])
+            candidates = db.select_words_by_pinyin_list (pps[:x], True)
             if candidates:
                 result += candidates[0][PHRASE]
                 break
@@ -524,12 +580,23 @@ def test_case (string):
     print result
 
 def test ():
-    test_case ("gaodangfangdichankaifashangdedongtianjiuyaolaile")
-    test_case ("huanyingshiyongwokaifadezhinengpinyinshurufa")
-    test_case ("beijingshirenminzhengfujuedingzaitongzhouqujianlizhengfuxingzhengjidi")
-    test_case ("woguojuminshoumingqiwangtigaodaoqishisansui")
-    test_case ("wgjmshmqwtgdqshss")
+    test_case("sanghaisi")
+    test_case("shengninlan")
+    test_case ("gaodangfandicankaifasandedongtianjiuyaolaile")
+    test_case ("shuirangwosigewaidiren")
+    test_case ("zuozaichuantoukanxinquxinquzongbijiuquhao")
+    test_case ("chiyaliezhui")
+    test_case ("linhao")
+    test_case ("cifansizhaisihenghaodesisizaisihaoa")
+    test_case ("shicuanshengnin")
+    test_case ("shzh")
+    test_case ("gangqin")
+    test_case ("gancai")
+    test_case ("woyongyuan'aini")
+    test_case ("sh's'c'ch'z'zh'l'n")
     test_case ("xjinyhuiyouyongme")
+    test_case ("wojinti'b'x'c'm")
+    test_case ("woquanpaiyixia")
 
 if __name__ == "__main__":
     import timeit

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ibus-pinyin VERSION\n"
 "Report-Msgid-Bugs-To: http://code.google.com/p/ibus/issues/entry\n"
-"POT-Creation-Date: 2009-01-25 15:21+0800\n"
+"POT-Creation-Date: 2009-03-02 13:28+0800\n"
 "PO-Revision-Date: 2008-08-28 19:19+0900\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
@@ -36,39 +36,39 @@ msgstr "ZGPY"
 msgid "PYJJ"
 msgstr "PYJJ"
 
-#: engine/pinyin.py:151
+#: engine/pinyin.py:154
 msgid "Configure PinYin"
 msgstr "ピンインを設定"
 
-#: engine/pinyin.py:158
+#: engine/pinyin.py:161
 msgid "CN"
 msgstr "中"
 
-#: engine/pinyin.py:159
+#: engine/pinyin.py:162
 msgid "Switch to English mode"
 msgstr "英語モードに切替"
 
-#: engine/pinyin.py:162
+#: engine/pinyin.py:165
 msgid "EN"
 msgstr "英"
 
-#: engine/pinyin.py:163
+#: engine/pinyin.py:166
 msgid "Switch to Chinese mode"
 msgstr "中国語モードに切替"
 
-#: engine/pinyin.py:168
+#: engine/pinyin.py:171
 msgid "Switch to half letter mode"
 msgstr "半角文字モードに切替"
 
-#: engine/pinyin.py:172
+#: engine/pinyin.py:175
 msgid "Switch to full letter mode"
 msgstr "全角文字モードに切替"
 
-#: engine/pinyin.py:177
+#: engine/pinyin.py:180
 msgid "Switch to half punctuation mode"
 msgstr "半角句読点モードに切替"
 
-#: engine/pinyin.py:181
+#: engine/pinyin.py:184
 msgid "Switch to full punctuation mode"
 msgstr "全角句読点モードに切替"
 
