@@ -1070,6 +1070,27 @@ class PinYinEngine(ibus.EngineBase):
         elif name == "FuzzyPinYin":
             PinYinEngine.__fuzzy_pinyin = \
                 config.get_value("engine/PinYin", "FuzzyPinYin", False)
+        elif name == "FuzzyS_Sh":
+            PinYinEngine..__fuzzyS_Sh = \
+                config.get_value("engine/PinYin", "FuzzyS_Sh", False)
+        elif name == "FuzzyC_Ch":
+            PinYinEngine..__fuzzyC_Ch = \
+                config.get_value("engine/PinYin", "FuzzyC_Ch", False)
+        elif name == "FuzzyZ_Zh":
+            PinYinEngine..__fuzzyZ_Zh = \
+                config.get_value("engine/PinYin", "FuzzyZ_Zh", False)
+        elif name == "FuzzyL_N":
+            PinYinEngine..__fuzzyL_N = \
+                config.get_value("engine/PinYin", "FuzzyL_N", False)
+        elif name == "FuzzyIn_Ing":
+            PinYinEngine.__fuzzyIn_Ing = \
+                config.get_value("engine/PinYin", "FuzzyIn_Ing", False)
+        elif name == "FuzzyEn_Eng":
+            PinYinEngine..__fuzzyEn_Eng = \
+                config.get_value("engine/PinYin", "FuzzyEn_Eng", False)
+        elif name == "FuzzyAn_Ang":
+            PinYinEngine..__fuzzyAn_Ang = \
+                config.get_value("engine/PinYin", "FuzzyAn_Ang", False)
         elif name == "AutoCorrect":
             PinYinEngine.__auto_correct = \
                 config.get_value("engine/PinYin", "AutoCorrect", True)
@@ -1138,6 +1159,21 @@ class PinYinEngine(ibus.EngineBase):
 
         PinYinEngine.__fuzzy_pinyin = \
             config.get_value("engine/PinYin", "FuzzyPinYin", False)
+        PinYinEngine.__fuzzyS_Sh = \
+            config.get_value("engine/PinYin", "FuzzyS_Sh", False)
+        PinYinEngine.__fuzzyC_Ch = \
+            config.get_value("engine/PinYin", "FuzzyC_Ch", False)
+        PinYinEngine.__fuzzyZ_Zh = \
+            config.get_value("engine/PinYin", "FuzzyZ_Zh", False)
+        PinYinEngine.__fuzzyL_N = \
+            config.get_value("engine/PinYin", "FuzzyL_N", False)
+        PinYinEngine.__fuzzyIn_Ing = \
+            config.get_value("engine/PinYin", "FuzzyIn_Ing", False)
+        PinYinEngine.__fuzzyEn_Eng = \
+            config.get_value("engine/PinYin", "FuzzyEn_Eng", False)
+        PinYinEngine.__fuzzyAn_Ang = \
+            config.get_value("engine/PinYin", "FuzzyAn_Ang", False)
+        
         PinYinEngine.__auto_correct = \
             config.get_value("engine/PinYin", "AutoCorrect", True)
         PinYinEngine.__spell_check = \
