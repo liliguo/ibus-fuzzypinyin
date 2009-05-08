@@ -236,8 +236,11 @@ class PYSQLiteDB:
 
         return pinyin_table
 
-    def select_words_by_pinyin_list (self, pys, mohu = False):
+    def select_words_by_pinyin_list (self, pys, fuzzy_sheng, fuzzy_yun):
         """select words from database by list that contains pyutil.PinYinWord objects"""
+
+        #print fuzzy_sheng
+        #print fuzzy_yun 
 
         pinyin_string = u"'".join (map (str, pys))
         result = self.select_cache [pinyin_string]
@@ -247,7 +250,7 @@ class PYSQLiteDB:
         tables_union = """( SELECT * FROM main.py_phrase WHERE %(conditions)s UNION ALL
         SELECT * FROM user_db.py_phrase WHERE %(conditions)s )"""
 
-        if mohu:
+        if fuzzy_sheng or fuzzy_yun:
             sql_conditions = ["+ylen = %d" % len (pys) ]
         else:
             sql_conditions = ["ylen = %d" % len (pys) ]
@@ -255,8 +258,10 @@ class PYSQLiteDB:
 
         i = 0
         s_i=0
+        mohu = bool(fuzzy_sheng or fuzzy_yun ) 
 
-        if mohu == False:
+        #if mohu == False:
+        if not mohu: 
             for py in pys[:4]:
                 if py.is_valid_pinyin ():
                     sql_conditions.append ("y%d = %d" % (i, py.get_pinyin_id ()))
@@ -272,13 +277,17 @@ class PYSQLiteDB:
                 if py.is_valid_pinyin ():
                     shengmu = py.get_shengmu ()
                     yunmu = py.get_pinyin ()[len (shengmu):]
-                    if shengmu in pydict.MOHU_SHENGMU:
-                        shengmu_list = pydict.MOHU_SHENGMU[shengmu]
+                    #if shengmu in pydict.MOHU_SHENGMU:
+                    if shengmu in fuzzy_sheng:
+                        #shengmu_list = pydict.MOHU_SHENGMU[shengmu]
+                        shengmu_list = fuzzy_sheng[shengmu]                    
                     else:
                         shengmu_list = [shengmu]
 
-                    if yunmu in pydict.MOHU_YUNMU:
-                        yunmu_list = pydict.MOHU_YUNMU[yunmu]
+                    if yunmu in fuzzy_yun:
+                    #if yunmu in pydict.MOHU_YUNMU:
+                        #yunmu_list = pydict.MOHU_YUNMU[yunmu]
+                        yunmu_list = fuzzy_yun[yunmu]                    
                     else:
                         yunmu_list = [yunmu]
 
@@ -312,8 +321,10 @@ class PYSQLiteDB:
                 else:
                     shengmu_ids = []
                     shengmu = py.get_shengmu ()
-                    if shengmu in pydict.MOHU_SHENGMU:
-                        for s in pydict.MOHU_SHENGMU[shengmu]:
+                    #if shengmu in pydict.MOHU_SHENGMU:
+                        #for s in pydict.MOHU_SHENGMU[shengmu]:
+                    if shengmu in fuzzy_sheng:
+                        for s in fuzzy_sheng[shengmu]:                           
                             shengmu_ids.append (pydict.SHENGMU_DICT[s])
                         #print shengmu_ids
                         shengmu_mohu_ids.append(shengmu_ids)
@@ -334,23 +345,24 @@ class PYSQLiteDB:
                         #sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
                             ssql_pinyin.append("( %s )" % " AND ".join(ss))
                         sql_conditions.append("( %s )" % " OR ".join(ssql_pinyin))
-                        #print sql_conditions
+                        print sql_conditions
                     else:
                         sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
 
         if pys[4:]:
-            pp = lambda (x): x.get_pattern (mohu)
-            pattern = "'".join (map (pp, pys[4:]))
-            sql_conditions.append ("yx LIKE \"" + pattern + "\"")
+            if False:     
+                pp = lambda (x): x.get_pattern (False)
+                pattern = "'".join (map (pp, pys[4:]))
+                sql_conditions.append ("yx LIKE \"" + pattern + "\"")
 
 
         tables_union = tables_union % { "conditions" : " AND ".join (sql_conditions) }
         sql_prefix = "SELECT * FROM " + tables_union
 
         sql_string = sql_prefix + " GROUP BY phrase ORDER BY user_freq DESC, freq DESC;"
-
+        #print "==========================================="
         #print sql_string
-
+        
         result = list (self.db.execute (sql_string).fetchall ())
 
         self.select_cache [pinyin_string] = result
@@ -566,8 +578,8 @@ def test_case (string):
     print result
 
 def test ():
-    test_case("sanghaisi")
-    test_case("shengninlan")
+    #test_case("sanghaisi")
+    #test_case("shengninlan")
     test_case ("gaodangfandicankaifasandedongtianjiuyaolaile")
     test_case ("shuirangwosigewaidiren")
     test_case ("zuozaichuantoukanxinquxinquzongbijiuquhao")
@@ -588,4 +600,3 @@ if __name__ == "__main__":
     import timeit
     t = timeit.Timer ("pysqlitedb.test ()", "import pysqlitedb")
     print t.repeat (3,1)
-

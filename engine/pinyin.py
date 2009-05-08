@@ -81,7 +81,14 @@ class PinYinEngine(ibus.EngineBase):
     __gbk = False
 
     # fuzzy pinyin & auto correct
-    __fuzzy_pinyin = False
+
+    __fuzzyS_Sh = False
+    __fuzzyC_Ch = False
+    __fuzzyZ_Zh = False
+    __fuzzyL_N = False
+    __fuzzyIn_Ing = False
+    __fuzzyEn_Eng = False
+    __fuzzyAn_Ang = False
     __auto_correct = True
     __spell_check = True
 
@@ -92,6 +99,11 @@ class PinYinEngine(ibus.EngineBase):
     __special_phrase_color = RGB(0, 0xbf, 0)
     __english_phrase_color = RGB(0, 0xbf, 0)
     __error_eng_phrase_color = RGB(0xef, 0, 0)
+
+    # mohu
+    __fuzzy_pinyin = False
+    __fuzzy_sheng = None
+    __fuzzy_yun = None
 
     # lookup table page size
     __page_size = 5
@@ -415,19 +427,58 @@ class PinYinEngine(ibus.EngineBase):
         except:
             return False
         return True
+    
+    def __check_fuzzy_dicts(self):
+        if PinYinEngine.__fuzzy_pinyin == False:
+            PinYinEngine.__fuzzy_sheng = {}
+            PinYinEngine.__fuzzy_yun = {}
+            return
+
+        if PinYinEngine.__fuzzy_sheng == None:
+            PinYinEngine.__fuzzy_sheng = {}
+            if PinYinEngine.__fuzzyZ_Zh == True:
+                PinYinEngine.__fuzzy_sheng["z"] = ("z", "zh")
+                PinYinEngine.__fuzzy_sheng["zh"] = ("z", "zh")
+            if PinYinEngine.__fuzzyS_Sh == True:
+                PinYinEngine.__fuzzy_sheng["s"] = ("s", "sh")
+                PinYinEngine.__fuzzy_sheng["sh"] = ("s", "sh")
+            if PinYinEngine.__fuzzyC_Ch == True:
+                PinYinEngine.__fuzzy_sheng["c"] = ("c", "ch")
+                PinYinEngine.__fuzzy_sheng["ch"] = ("c", "ch")
+            if PinYinEngine.__fuzzyL_N == True:
+                PinYinEngine.__fuzzy_sheng["l"] = ("l", "n")
+                PinYinEngine.__fuzzy_sheng["n"] = ("l", "n")
+        if PinYinEngine.__fuzzy_yun == None:
+            PinYinEngine.__fuzzy_yun = {}
+            if PinYinEngine.__fuzzyAn_Ang == True:
+                PinYinEngine.__fuzzy_yun["an"] = ("an", "ang")
+                PinYinEngine.__fuzzy_yun["ang"] = ("an", "ang")
+            if PinYinEngine.__fuzzyIn_Ing == True:
+                PinYinEngine.__fuzzy_yun["in"] = ("in", "ing")
+                PinYinEngine.__fuzzy_yun["ing"] = ("in", "ing")
+            if PinYinEngine.__fuzzyEn_Eng == True:
+                PinYinEngine.__fuzzy_yun["en"] = ("en", "eng")
+                PinYinEngine.__fuzzy_yun["eng"] = ("en", "eng")
+        return None
 
     def __get_candidates(self, pinyin_list):
         candidates = []
-
+        if PinYinEngine.__fuzzy_sheng == None or PinYinEngine.__fuzzy_yun == None:
+            self.__check_fuzzy_dicts()
+        
         for i in range(len(pinyin_list), 0, -1):
-            candidates += self.__pydb.select_words_by_pinyin_list(pinyin_list[:i], PinYinEngine.__fuzzy_pinyin)
+            candidates += self.__pydb.select_words_by_pinyin_list(pinyin_list[:i], PinYinEngine.__fuzzy_sheng, PinYinEngine.__fuzzy_yun)
         if not PinYinEngine.__gbk:
             candidates = filter(self.__is_gb2312, candidates)
         return candidates
 
     def __get_a_candidate(self, pinyin_list):
+        if PinYinEngine.__fuzzy_sheng == None:
+            self.__check_fuzzy_dicts()
+        if PinYinEngine.__fuzzy_yun == None:
+            self.__check_fuzzy_dicts()
         for i in range(len(pinyin_list), 0, -1):
-            candidates = self.__pydb.select_words_by_pinyin_list(pinyin_list[:i], PinYinEngine.__fuzzy_pinyin)
+            candidates = self.__pydb.select_words_by_pinyin_list(pinyin_list[:i], PinYinEngine.__fuzzy_sheng, PinYinEngine.__fuzzy_yun)
             if not PinYinEngine.__gbk:
                 candidates = filter(self.__is_gb2312, candidates)
             if candidates:
@@ -925,10 +976,14 @@ class PinYinEngine(ibus.EngineBase):
 
 
     def process_key_event(self, keyval, state):
-        key = KeyEvent(keyval, state & modifier.RELEASE_MASK == 0, state)
-        result = self.__internal_process_key_event(key)
-        self.__update()
-        self.__prev_key = key
+        try:
+            key = KeyEvent(keyval, state & modifier.RELEASE_MASK == 0, state)
+            result = self.__internal_process_key_event(key)
+            self.__update()
+            self.__prev_key = key
+        except:
+            import traceback
+            traceback.print_exc()
         return result
 
     def commit_string(self, string, need_update = True):
@@ -1069,28 +1124,37 @@ class PinYinEngine(ibus.EngineBase):
                 PinYinEngine.__shuangpin_schema = "MSPY"
         elif name == "FuzzyPinYin":
             PinYinEngine.__fuzzy_pinyin = \
-                config.get_value("engine/PinYin", "FuzzyPinYin", False)
+                config.get_value("engine/PinYin", "FuzzyPinYin", True)
+            PinYinEngine.__fuzzy_sheng = None
+            PinYinEngine.__fuzzy_yun = None
         elif name == "FuzzyS_Sh":
-            PinYinEngine..__fuzzyS_Sh = \
-                config.get_value("engine/PinYin", "FuzzyS_Sh", False)
+            PinYinEngine.__fuzzyS_Sh = \
+                config.get_value("engine/PinYin", "FuzzyS_Sh", True)
+            PinYinEngine.__fuzzy_sheng = None
         elif name == "FuzzyC_Ch":
-            PinYinEngine..__fuzzyC_Ch = \
-                config.get_value("engine/PinYin", "FuzzyC_Ch", False)
+            PinYinEngine.__fuzzyC_Ch = \
+                config.get_value("engine/PinYin", "FuzzyC_Ch", True)
+            PinYinEngine.__fuzzy_sheng = None
         elif name == "FuzzyZ_Zh":
-            PinYinEngine..__fuzzyZ_Zh = \
-                config.get_value("engine/PinYin", "FuzzyZ_Zh", False)
+            PinYinEngine.__fuzzyZ_Zh = \
+                config.get_value("engine/PinYin", "FuzzyZ_Zh", True)
+            PinYinEngine.__fuzzy_sheng = None
         elif name == "FuzzyL_N":
-            PinYinEngine..__fuzzyL_N = \
-                config.get_value("engine/PinYin", "FuzzyL_N", False)
+            PinYinEngine.__fuzzyL_N = \
+                config.get_value("engine/PinYin", "FuzzyL_N", True)
+            PinYinEngine.__fuzzy_sheng = None
         elif name == "FuzzyIn_Ing":
             PinYinEngine.__fuzzyIn_Ing = \
-                config.get_value("engine/PinYin", "FuzzyIn_Ing", False)
+                config.get_value("engine/PinYin", "FuzzyIn_Ing", True)
+            PinYinEngine.__fuzzy_yun = None
         elif name == "FuzzyEn_Eng":
-            PinYinEngine..__fuzzyEn_Eng = \
-                config.get_value("engine/PinYin", "FuzzyEn_Eng", False)
+            PinYinEngine.__fuzzyEn_Eng = \
+                config.get_value("engine/PinYin", "FuzzyEn_Eng", True)
+            PinYinEngine.__fuzzy_yun = None
         elif name == "FuzzyAn_Ang":
-            PinYinEngine..__fuzzyAn_Ang = \
-                config.get_value("engine/PinYin", "FuzzyAn_Ang", False)
+            PinYinEngine.__fuzzyAn_Ang = \
+                config.get_value("engine/PinYin", "FuzzyAn_Ang", True)
+            PinYinEngine.__fuzzy_yun = None
         elif name == "AutoCorrect":
             PinYinEngine.__auto_correct = \
                 config.get_value("engine/PinYin", "AutoCorrect", True)
@@ -1152,6 +1216,9 @@ class PinYinEngine(ibus.EngineBase):
 
         config = bus.get_config()
 
+        PinYinEngine.__fuzzy_sheng = None
+        PinYinEngine.__fuzzy_yun = None
+
         PinYinEngine.__shuangpin_schema = \
             config.get_value("engine/PinYin", "ShuangPinSchema", "MSPY")
         if PinYinEngine.__shuangpin_schema not in pydict.SHUANGPIN_SCHEMAS:
@@ -1166,14 +1233,13 @@ class PinYinEngine(ibus.EngineBase):
         PinYinEngine.__fuzzyZ_Zh = \
             config.get_value("engine/PinYin", "FuzzyZ_Zh", False)
         PinYinEngine.__fuzzyL_N = \
-            config.get_value("engine/PinYin", "FuzzyL_N", False)
+             config.get_value("engine/PinYin", "FuzzyL_N", False)
         PinYinEngine.__fuzzyIn_Ing = \
             config.get_value("engine/PinYin", "FuzzyIn_Ing", False)
         PinYinEngine.__fuzzyEn_Eng = \
             config.get_value("engine/PinYin", "FuzzyEn_Eng", False)
         PinYinEngine.__fuzzyAn_Ang = \
             config.get_value("engine/PinYin", "FuzzyAn_Ang", False)
-        
         PinYinEngine.__auto_correct = \
             config.get_value("engine/PinYin", "AutoCorrect", True)
         PinYinEngine.__spell_check = \
