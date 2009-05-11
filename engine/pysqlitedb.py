@@ -287,13 +287,6 @@ class PYSQLiteDB:
                         for y in yunmu_list:
                             pinyin = s + y
                             if pinyin in pydict.PINYIN_DICT:
-<<<<<<< HEAD:engine/pysqlitedb.py
-                                pinyin_ids.append (str (pydict.PINYIN_DICT[pinyin]))
-                    if len (pinyin_ids) > 1:
-                        sql_conditions.append ("y%d in (%s)" % (i, ",".join (pinyin_ids)))
-                    else:
-                        sql_conditions.append ("y%d == %s" % (i, pinyin_ids[0]))
-=======
                                 pinyin_ids.append (pydict.PINYIN_DICT[pinyin])
                                 #print pinyin_ids
                     
@@ -315,7 +308,6 @@ class PYSQLiteDB:
                         sql_pinyin.append("( %s )" % " AND ".join(s))
                     sql_conditions.append("( %s )" % " OR ".join(sql_pinyin))
                     #print sql_conditions
->>>>>>> changed the speed of fuzzypinyin:engine/pysqlitedb.py
 
                 else:
                     shengmu_ids = []
@@ -344,14 +336,7 @@ class PYSQLiteDB:
                         sql_conditions.append("( %s )" % " OR ".join(ssql_pinyin))
                         #print sql_conditions
                     else:
-                        sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))
-<<<<<<< HEAD:engine/pysqlitedb.py
-                i += 1
-
-=======
-                        #print i
-       
->>>>>>> changed the speed of fuzzypinyin:engine/pysqlitedb.py
+                        sql_conditions.append ("s%d = %d" % (i, py.get_sheng_mu_id ()))       
         if pys[4:]:
             pp = lambda (x): x.get_pattern (mohu)
             pattern = "'".join (map (pp, pys[4:]))
